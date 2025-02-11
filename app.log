@@ -1,0 +1,7 @@
+2025-02-08 07:52:34,260 - INFO - Model and Scaler loaded successfully.
+2025-02-08 07:52:34,266 - WARNING -  * Debugger is active!
+2025-02-08 07:52:34,266 - INFO -  * Debugger PIN: 720-545-332
+2025-02-08 07:52:39,070 - INFO - 127.0.0.1 - - [08/Feb/2025 07:52:39] "GET / HTTP/1.1" 200 -
+2025-02-08 07:57:09,159 - INFO - 127.0.0.1 - - [08/Feb/2025 07:57:09] "GET / HTTP/1.1" 200 -
+2025-02-08 07:2025-02-08 07:57:31,119 - INFO -  * Restarting with stat
+pecialistcrsh/app.py', reloading

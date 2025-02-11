@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game Prediction</title>
+</head>
+<body>
+    <h1>Game Prediction System</h1>
+
+    <div>
+        <label for="timestamp">Timestamp:</label>
+        <input type="text" id="timestamp" readonly>
+        <button onclick="setCurrentTime()">Set Current Time</button>
+    </div>
+
+    <div>
+        <label for="multiplier">Previous Odds:</label>
+        <input type="number" id="multiplier" step="0.01">
+    </div>
+
+    <div>
+        <button onclick="predict()">Predict</button>
+        <label for="prediction">Prediction:</label>
+        <input type="text" id="prediction" readonly>
+    </div>
+
+    <div>
+        <button onclick="addData()">Add Data</button>
+        <button onclick="clearData()">Clear Data</button>
+        <button onclick="exportData()">Export Data</button>
+    </div>
+
+    <h2>Round History</h2>
+    <table border="1">
+        <thead>
+            <tr>
+                <th>Multiplier</th>
+                <th>Timestamp</th>
+                <th>Prediction</th>
+            </tr>
+        </thead>
+        <tbody id="roundHistory">
+        </tbody>
+    </table>
+
+    <script>
+        // Function to set current time in 12-hour format with AM/PM
+        function setCurrentTime() {
+            const now = new Date();
+            const hours = now.getHours() % 12 || 12;
+            const minutes = now.getMinutes().toString().padStart(2, '0');
+            const seconds = now.getSeconds().toString().padStart(2, '0');
+            const ampm = now.getHours() >= 12 ? 'PM' : 'AM';
+            document.getElementById('timestamp').value = `${hours}:${minutes}:${seconds} ${ampm}`;
+        }
+    
+        // Function to send prediction request using AJAX (Fetch API)
+        async function predict() {
+            const timestamp = document.getElementById('timestamp').value;
+            const multiplier = parseFloat(document.getElementById('multiplier').value);
+
+            if (!timestamp || isNaN(multiplier)) {
+                alert("Please provide both a valid timestamp and previous odds.");
+                return;
+            }
+
+            try {
+                const response = await fetch('http://127.0.0.1:5000/predict', {  // Make sure Flask server is running
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ features: [multiplier, timestamp] })
+                });
+
+                const data = await response.json();
+                if (response.ok) {
+                    document.getElementById('prediction').value = data.predicted_multiplier;
+                    alert("Prediction: " + data.predicted_multiplier + ", Category: " + data.predicted_category);
+                } else {
+                    alert("Error: " + data.error);
+                }
+            } catch (error) {
+                alert("Error: " + error.message);
+            }
+        }
+    
+        // Function to add data to table
+        function addData() {
+            const multiplier = document.getElementById('multiplier').value;
+            const timestamp = document.getElementById('timestamp').value;
+            const prediction = document.getElementById('prediction').value;
+    
+            if (multiplier && timestamp && prediction) {
+                const tbody = document.getElementById('roundHistory');
+                const row = tbody.insertRow();
+                row.insertCell(0).textContent = multiplier;
+                row.insertCell(1).textContent = timestamp;
+                row.insertCell(2).textContent = prediction;
+
+                // Reset input fields
+                document.getElementById('multiplier').value = '';
+                document.getElementById('timestamp').value = '';
+                document.getElementById('prediction').value = '';
+            } else {
+                alert('Please fill all fields: Multiplier, Timestamp, and Prediction.');
+            }
+        }
+    
+        // Function to clear table rows but keep headers
+        function clearData() {
+            document.getElementById('roundHistory').innerHTML = ''; 
+        }
+    
+        // Function to export data as CSV
+        function exportData() {
+            const tbody = document.getElementById('roundHistory');
+            let csvContent = 'Multiplier,Timestamp,Prediction\n';
+            
+            for (let row of tbody.rows) {
+                const cells = row.cells;
+                csvContent += `${cells[0].textContent},${cells[1].textContent},${cells[2].textContent}\n`;
+            }
+    
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = 'game_data.csv';
+            link.click();
+        }
+    </script>
+</body>
+</html>

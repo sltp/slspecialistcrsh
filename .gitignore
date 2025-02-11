@@ -1,0 +1,14 @@
+# Ignore Python bytecode
+__pycache__/
+*.pyc
+
+# Ignore virtual environments
+venv/
+env/
+
+# Ignore .env files
+.env
+
+# Ignore Dockerfiles and images
+Dockerfile
+*.img
